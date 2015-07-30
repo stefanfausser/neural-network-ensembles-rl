@@ -1,0 +1,28 @@
+len <- 100 # see steps in startMazeElEval.sh
+len2 <- 60 # see steps2 in startMazeElEval.sh
+
+experimentStart <- 10
+experimentBy <- 10
+
+nDigits <- 1
+off <- 10
+file_suffix <- "_benchmark_score"
+
+plotFile <- "tetris_score"
+plotXAxisAt <- c(10, 20, 40, 60, 80, 100)
+plotXAxisLabels <- c("0.5", "1", "2", "3", "4", "5")
+plotMainLab <- "SZ-Tetris"
+plotXLab <- expression(paste(10^6, " iterations"))
+plotYLab <- "score"
+
+pValuesFrom <- 30
+
+confName <- "tetris"
+
+# parameterPlotXAxisAt <- c(5, 10, 15, 20, 25, 30, 35, 50)
+# parameterPlotXAxisLabels <- c("5", "10", "15", "20", "25", "30", "35", "50")
+parameterPlotXAxisAt <- c(5, 10, 15, 20, 25, 30, 50)
+parameterPlotXAxisLabels <- c("5", "10", "15", "20", "25", "30", "50")
+parameterPlotNDigits <- 0
+
+isTetris <- 1

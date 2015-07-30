@@ -1,0 +1,117 @@
+Training and testing of the agents
+
+The main purpose of this software is to replicate the experiments done in the publications listed below.
+The second purpose of this software is to allow others to re-use this software under the MIT license (see License.txt).
+In case of re-use I kindly ask to cite the references below, where appropriate.
+
+Warning: The source code may consist of dead code, unused code (including unused parameters), wrongly documented code, 
+or simply not working code parts. In short, it is (mainly) written for replicating the experiments and has not been (much) 
+cleaned-up afterwards. No guarantees whatsoever.
+
+Currently supported reinforcement learning (RL) environments: Generalized maze, SZ-Tetris
+Supported RL methods with function approximation (multi-layer perceptron): TD, TD(lambda), RG, TDC, GTD2
+Supported action selection policies: epsilon-greedy, softmax
+
+I) Publications
+
+1. List of publications
+
+The software were used for the following articles: 
+[1] Faußer, S. and Schwenker, F. (2015). "Neural Network Ensembles in Reinforcement Learning“. 
+    In: Neural Processing Letters 41.1, pp. 55-69. doi: 10.1007/s11063-013-9334-5.
+[2] Faußer, S. and Schwenker, F. (2014). "Selective Neural Network Ensembles in Reinforcement Learning“. 
+    In: Proceedings 22nd European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning. (Bruges, Belgium). ESANN ’14, pp. 105-110.
+[3] Faußer, S. and Schwenker, F. (2015). "Selective neural network ensembles in reinforcement learning: Taking the advantage of many agents“. 
+    In: Neurocomputing 169, pp. 350-357. doi: 10.1016/j.neucom.2014.11.075.
+[4] Faußer, S. (2015). "Large state spaces and large data: Utilizing neural network ensembles in reinforcement learning and kernel methods for clustering". 
+    Doctoral thesis. URN: urn:nbn:de:bsz:289-vts-96149. URL: http://vts.uni-ulm.de/doc.asp?id=9614.
+    
+2. Software-related publication differences
+
+Summarized, [1] is with the full ensembles and single agents, [2,3] is with the selective ensembles and 
+[4] is with all of them plus additional results. Further in [1], the full ensembles had up to ten agents,
+while in [2-4], full ensembles with up to fifty agents were trained and evaluated. 
+The environment-based / RL-based changes are as follows:
+
+2.1 Generalized maze
+
+- In [1,2], out of 1000 generated mazes, 900 were in the training set and 100 in the validation set, 
+  while in [3,4] 500 were in the training set and 500 were in the validation set (more fairly splitted)
+- In [1], the retries per stating state in the generalized maze environment were 10, while in [1] the retries were 50
+  and in [3,4] the retries were 20
+- In [1,2], the multi-layer perceptron had h=5 neurons in the hidden layer, while in [3,4], the number of neurons were h=10
+  (the reason for the increased number of neurons were the more fairly split of the generated mazes, see above)
+- In [1,2], the discounting rate (gamma) were 0.9, while in [3,4], the discounting rate were 0.95
+- In [1], the tested RL methods were: TD with epsilon-greedy, TD with softmax, RG with epsilon-greedy, RG with softmax
+- In [2], the tested RL methods were: RG with softmax
+- In [3], the tested RL methods were: RG with softmax, TDC with epsilon-greedy
+- In [4], the tested RL methods were: TD with epsilon-greedy, TD with softmax, RG with epsilon-greedy, RG with softmax,
+  TDC with epsilon-greedy, TDC with softmax
+
+2.2 SZ-Tetris
+
+- In [1,2], the tested RL methods were: TD-lambda with epsilon-greedy
+- In [3,4], the tested RL methods were: TD-lambda with epsilon-greedy, TDC with epsilon-greedy
+
+II) Required development / running system
+
+- GNU/Linux OS (for example Debian or Ubuntu) with the following development tools: gcc, make, R
+- Processor with at least six physical cores (like AMD Phenom II X6 1090T)
+- Minimum 16 GByte memory
+
+With less processor cores and / or less memory, the bash scripts need to be modified to run less instances of the 
+training / simulation / evaluation software in parallel.
+
+III) Steps for reproducing the experiments
+
+1. Preparations:
+
+Search the directories for any archives (e.g. 'zip') and extract them.
+
+2. Change the working directory:
+
+$ cd path-to/esrlfa/maze/Xagents-ensembleDuringLearning-rg-1
+
+where 'maze' is the environment and 'rg' in 'Xagents-ensembleDuringLearning-rg-1' is the Residual Gradient (RG) method. 
+Other environments and RL methods may be available (see directories).
+
+3. Copy over the bash scripts, R scripts and seeds for the random number generator. Build the environment:
+
+$ cp ../common/* ../../common-scripts/* .
+$ /bin/bash build.sh
+
+4. Train the single agents, the full ensembles and evaluate the results:
+
+Attention: Depending on your target system (number of processors, memory), this step may take days to weeks of computation time.
+
+For reproducing the experiments in [3,4] (generalized maze and SZ-Tetris) and in [1-2] (SZ-Tetris):
+$ /bin/bash start-fullEnsembles.sh
+
+For reproducing the experiments in [1,2] (generalized maze):
+$ /bin/bash start-fullEnsembles.sh NEPL
+
+Attention: In [2], the number of retries per starting state in the maze were 50 instead of 10, i.e. set retriesRandomlySelective=50 
+in maze/common/startElEval_env.sh-NEPL before running 'start-fullEnsembles.sh NEPL' for reproducing the experiments in [2].
+Likewise, revert it back to 50 for reproducing the experiments in [1].
+
+Attention: In [1], the ensembles with joint decisions in the training phase had different number of runs / repetitions
+depending on the number of agents in the ensemble. 20 runs with five agents and 16 runs with three agents.
+(Configurable with 'nTestrunsEnsemblePolicyEnsemble' in startElEval.R)
+
+Note that this step is for the generalized maze only. In case of the full ensembles and single agents,
+the SZ-Tetris results with the TD-lambda method are identical in all articles, i.e. in [1-4], 
+except for the added results with the TDC method in [3,4].
+
+After the training of all the agents and the ensembles, all of them are tested in a benchmark setting. 
+The results are then parsed and evaluated with an R script (startElEval.R) which is started in 
+'start-fullEnsembles.sh'. The table results are outputted in a LaTeX-style format to the text console, 
+while the graphics are redirected to EPS files in the working directory. 
+
+5. Train the selective ensembles and evaluate the results:
+
+Precondition: Requires trained single agents and full ensembles, see III.3 above.
+
+Attention: Depending on your target system (number of processors, memory), this step may take days to weeks of computation time.
+
+$ /bin/bash start-selectiveEnsembles.sh
+This reproduces the experiments in [2-4]. The results are parsed and evaluated similar as in step 3 (see above).

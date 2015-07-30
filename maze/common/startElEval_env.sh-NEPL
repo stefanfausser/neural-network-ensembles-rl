@@ -1,0 +1,126 @@
+testruns=10
+mazes=100
+agents=3
+agents2=5
+agents3=10
+agents4=20
+agents5=30
+agents6=50
+agentsSequentially=5
+agentsSequentially2=3
+agentsSequentially3=10
+generatemazes=0
+barriersMin=3
+barriersMax=5
+heightAndWidth=5
+maxSteps=20
+number_experiments=23
+mazefile="../maze1000.sav-NEPL"
+testStartI=0
+testEndI=99
+upwindEpsilon=0.3
+retries=10
+# NEPL: 10 retries for randomly selective ensembles, ESANN: 50 retries!
+retriesRandomlySelective=10
+iterationsPerAgent=1
+seedFile="mazeSeeds2.txt"
+savFile="mazeMlpSav"
+# iterationsPerStep=100000
+benchmarkIncrement=5
+# steps for single agent and committee, no ensemble decisions during learning but during benchmark
+steps=250
+# steps for committee, ensemble decisions during learning
+steps2=150
+#steps2=0
+maxParallelTestruns=10
+ensembleIndicesFile="selEnsembleIndices"
+ensembleSizesFile="selEnsembleSizes"
+ensembleWeightsFile="selEnsembleWeights"
+# ensembleIndicesFile2="../../common/ensembleIndices_" # 30 test runs
+# ensembleIndicesFile2="../../common/ensembleIndices3_" # 20 test runs 
+ensembleIndicesFile2="../../common/ensembleIndices2_" # 50 test runs
+ensembleIndicesFile3="../../common/ensembleIndicesPartialParallel_" # 20 test runs (sequentially trained agents)
+useEnsembleIndicesFile=1 # for experiments with parallel trained agents
+useEnsembleIndicesFile2=0 # for experiments 4...9 (sequentially trained agents)
+testrunStartSingle=0
+testrunStartSequentially=0
+offset2=0
+onlyBenchmark=0
+# onlyBenchmark=1
+
+if [ ! -e $seedFile ]
+then
+    echo seed file "$seedFile" does not exist, exiting
+    exit -1
+fi
+
+testruns_single_agent=100
+
+testrunsSequentially=20
+
+iterationsPerStep=$( cat maze_mlp1.conf | grep -E "iterations = [0-9]+" | grep -Eo [0-9]+ )
+
+experimentDir="experiment"
+
+experimentDir2="experiment"
+if((useEnsembleIndicesFile != 0))
+then
+    experimentDir2="experiment-sampledindices"
+fi
+
+if (($generatemazes != 0))
+then
+    # generate the maze for the first time
+    echo "Generate $mazes mazes"
+
+    ./maze --mazeHeightAndWidth $heightAndWidth --generate $mazefile $mazes --barriers $barriersMin $barriersMax --conf maze_mlp1.conf $extraOptions --upwindEpsilon $upwindEpsilon --iterationsPerAgent $iterationsPerAgent --maxSteps $maxSteps --retries $retries --test $testStartI $testEndI > /dev/null
+else
+    if [ ! -e $mazefile ]
+    then
+        echo file "$mazefile" does not exist. Generate the maze first.
+        exit -1
+    fi
+fi
+
+# create directories for the MLP save files
+for ((experimentcount=1; experimentcount <= $number_experiments; experimentcount++))
+do
+    if(((experimentcount >= 4) && (experimentcount <= 9)))
+    then
+        mkdir -p "$experimentDir""$experimentcount"
+    elif(( (experimentcount == 2) || (experimentcount == 3) || ((experimentcount >= 10) && (experimentcount <= 13)) || ((experimentcount >= 16) && (experimentcount <= 21)) ))
+    then
+        mkdir -p "$experimentDir2""$experimentcount"
+    else
+        mkdir -p experiment"$experimentcount"
+    fi
+done
+
+executableBinary="maze"
+conf_prefix="maze"
+environmentParametersBasic="--load $mazefile --mazeHeightAndWidth $heightAndWidth --upwindEpsilon $upwindEpsilon"
+environmentParameters="$environmentParametersBasic --maxSteps $maxSteps --retries $retries --test $testStartI $testEndI --learnExploredActions"
+environmentParametersRandomlySelective="$environmentParametersBasic --maxSteps $maxSteps --retries $retriesRandomlySelective --test $testStartI $testEndI --learnExploredActions"
+benchmarkExtraOptions=""
+nDigitsResults=2
+nDigitsPValues=4
+experimentSeqSelAvgLen=4
+experimentSeqSelVotingLen=4
+score=0
+
+probToAddState=1.0
+maxStates=50000
+getStatesBenchmarkExtras="--maxSteps 20 --retries 20 --test 0 499"
+maxBestActions=0
+retriesConsistenciesAverage=200
+retriesConsistenciesVoting=200
+
+probToAddStateSingle=1.0
+maxStatesSingle=50000
+retriesConsistenciesSingle=200
+getStatesBenchmarkExtrasSingle="--maxSteps 20 --retries 20 --test 0 499 --randomStarts --nStatesPerAgentMax 10000"
+
+startTCheck=50
+endTCheck=50
+startTNEPLCheck=5
+endTNEPLCheck=5

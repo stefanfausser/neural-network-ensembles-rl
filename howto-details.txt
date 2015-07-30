@@ -1,0 +1,47 @@
+Training and testing of the agents - Detailed steps
+
+Attention: Please read the 'howto.txt' first.
+
+I) Train the single agents, the full ensembles and evaluate the results
+
+(see start-fullEnsembles.sh)
+
+1. Copy over the bash scripts, R scripts and seeds for the random number generator. Build the environment:
+$ cp ../common/* ../../common-scripts/* .
+$ /bin/bash build.sh
+
+2. Preparations:
+$ cp startElEval_env.sh-org startElEval_env.sh
+$ cp conf/* .
+
+3. Train the single agents: 
+$ /bin/bash ./startElEval-singleAgents.sh
+
+4. Train the full ensembles: 
+$ /bin/bash ./startElEval-fullEnsembles.sh
+
+5. For [1] only, see 'howto.txt': Train the ensembles with joint decisions in training phase:
+$ /bin/bash ./startElEval-ensembles.sh
+
+6. Parse and evaluate the log files: 
+$ /bin/bash ./startElEval-eval.sh (calls startMazeElEval.R)
+
+II) Train the selective ensembles and evaluate the results
+
+(see start-selectiveEnsembles.sh)
+
+Precondition: Requires trained single agents and full ensembles, see I) above.
+
+1. Get the state repos for the selective ensembles: 
+$ /bin/bash ./getStateValues.sh # (state collection by ensemble)
+$ /bin/bash ./getStateValues-singleDecisions-allAgents.sh # (state collection by single agents)
+
+2. Train the selective ensembles: 
+$ R
+$ > source("selectiveEnsembleLearning.R") 
+$ > performTests()
+
+3. Evaluate the selective ensembles: 
+$ R
+$ > source("parameterPlot1.R") # use parameterPlot1-thesis.R for reproducing the graphs used in my Doctoral thesis
+$ > source ("getSelectiveEnsembleResults.R")

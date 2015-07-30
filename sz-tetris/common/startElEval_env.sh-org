@@ -1,0 +1,107 @@
+testruns=10
+agents=3
+agents2=5
+agents3=10
+agents4=20
+agents5=30
+agents6=50
+agentsSequentially=5
+agentsSequentially2=3
+agentsSequentially3=10
+maxActions=50000
+number_experiments=23
+retries=100
+iterationsPerAgent=1
+seedFile="tetrisSeeds2.txt"
+savFile="tetrisMlpSav"
+# iterationsPerStep=50000
+benchmarkIncrement=10
+# benchmarkIncrement=1
+# steps for single agent and committee, no ensemble decisions during learning but during benchmark
+steps=100 # 5M
+# steps=0 # 5M
+# steps for committee, ensemble decisions during learning
+steps2=60 # 3M
+# steps2=0 # 3M
+maxParallelTestruns=10
+ensembleIndicesFile="selEnsembleIndices"
+ensembleSizesFile="selEnsembleSizes"
+ensembleWeightsFile="selEnsembleWeights"
+# ensembleIndicesFile2="../../common/ensembleIndices_" # 30 test runs
+# ensembleIndicesFile2="../../common/ensembleIndices3_" # 20 test runs 
+ensembleIndicesFile2="../../common/ensembleIndices2_" # 50 test runs
+ensembleIndicesFile3="../../common/ensembleIndicesPartialParallel_" # 20 test runs (sequentially trained agents)
+useEnsembleIndicesFile=1 # for experiments with parallel trained agents
+useEnsembleIndicesFile2=0 # for experiments 4...9 (sequentially trained agents)
+testrunStartSingle=0
+testrunStartSequentially=0
+offset2=0
+onlyBenchmark=0
+# onlyBenchmark=1
+
+if [ ! -e $seedFile ]
+then
+    echo seed file "$seedFile" does not exist, exiting
+    exit -1
+fi
+
+testruns_single_agent=100
+
+testrunsSequentially=20
+
+iterationsPerStep=$( cat tetris_mlp1.conf | grep -E "iterations = [0-9]+" | grep -Eo [0-9]+ )
+
+experimentDir="experiment"
+
+experimentDir2="experiment"
+if((useEnsembleIndicesFile != 0))
+then
+    experimentDir2="experiment-sampledindices"
+fi
+
+# create directories for the MLP save files
+for ((experimentcount=1; experimentcount <= $number_experiments; experimentcount++))
+do
+    if(((experimentcount >= 4) && (experimentcount <= 9)))
+    then
+        mkdir -p "$experimentDir""$experimentcount"
+    elif(( (experimentcount == 2) || (experimentcount == 3) || ((experimentcount >= 10) && (experimentcount <= 13)) || ((experimentcount >= 16) && (experimentcount <= 21)) ))
+    then
+        mkdir -p "$experimentDir2""$experimentcount"
+    else
+        mkdir -p experiment"$experimentcount"
+    fi
+done
+
+executableBinary="sz-tetris"
+conf_prefix="tetris"
+environmentParametersBasic=""
+environmentParameters="$environmentParametersBasic --learnExploredActions --maxActions $maxActions --retries $retries"
+environmentParametersRandomlySelective="$environmentParametersBasic --learnExploredActions --maxActions $maxActions --retries $retriesRandomlySelective"
+benchmarkExtraOptions="--loadPieceSequence --pieceSequenceFile ../tetrisPieceSeq"
+nDigitsResults=1
+nDigitsPValues=4
+experimentSeqSelAvgLen=3
+experimentSeqSelVotingLen=3
+score=1
+
+probToAddState=0.3
+maxStates=50000
+getStatesBenchmarkExtras="--loadPieceSequence --pieceSequenceFile ../tetrisPieceSeq --retries 100"
+maxBestActions=4
+retriesConsistenciesAverage=500
+retriesConsistenciesVoting=1000
+
+probToAddStateSingle=0.1
+maxStatesSingle=20000
+retriesConsistenciesSingle=1000
+getStatesBenchmarkExtrasSingle="--loadPieceSequence --pieceSequenceFile ../tetrisPieceSeq --retries 100 --nStatesPerAgentMax 200"
+
+startTCheck=20
+endTCheck=20
+# startTNEPLCheck=5
+# endTNEPLCheck=5
+
+selectiveT=20
+startJSelective=1
+endJSelective=2
