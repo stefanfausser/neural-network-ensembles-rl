@@ -1,7 +1,7 @@
 Training and testing of the agents
 
 The main purpose of this software is to replicate the experiments done in the publications listed below.
-The second purpose of this software is to allow others to re-use this software under the MIT license (see License.txt).
+The second purpose of this software is to allow others to re-use this software under the MIT license (see LICENSE).
 In case of re-use I kindly ask to cite the references below, where appropriate.
 
 Warning: The source code may consist of dead code, unused code (including unused parameters), wrongly documented code, 
